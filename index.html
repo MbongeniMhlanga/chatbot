@@ -3,17 +3,17 @@
 <head>
   <title>ChatGPT Bot</title>
   <style>
-    body { font-family: Arial; padding: 20px; max-width: 600px; margin: auto; }
+    body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto; }
     #chat { border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: auto; margin-bottom: 10px; }
     .user { color: blue; font-weight: bold; }
     .bot { color: green; }
-    input, button { padding: 8px; width: 100%; margin-top: 5px; }
+    input, button { padding: 10px; width: 100%; margin-top: 5px; }
   </style>
 </head>
 <body>
   <h2>ChatGPT Bot</h2>
   <div id="chat"></div>
-  <input type="text" id="userInput" placeholder="Type your question..." />
+  <input type="text" id="userInput" placeholder="Type your message..." />
   <button onclick="sendMessage()">Send</button>
 
   <script>
@@ -26,22 +26,31 @@
       chatBox.innerHTML += `<p class="user">You: ${message}</p>`;
       input.value = '';
 
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer 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' // 🔐 Replace this with a server-side proxy later!
-        },
-        body: JSON.stringify({
-          model: 'gpt-4',
-          messages: [{ role: 'user', content: message }]
-        })
-      });
+      try {
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer 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' // ⬅️ REPLACE THIS
+          },
+          body: JSON.stringify({
+            model: 'gpt-3.5-turbo',
+            messages: [{ role: 'user', content: message }]
+          })
+        });
 
-      const data = await response.json();
-      const reply = data.choices[0].message.content;
-      chatBox.innerHTML += `<p class="bot">Bot: ${reply}</p>`;
-      chatBox.scrollTop = chatBox.scrollHeight;
+        const data = await response.json();
+        if (data.choices && data.choices[0]) {
+          const reply = data.choices[0].message.content;
+          chatBox.innerHTML += `<p class="bot">Bot: ${reply}</p>`;
+        } else {
+          chatBox.innerHTML += `<p class="bot">Bot: [Error: No response from API]</p>`;
+        }
+
+        chatBox.scrollTop = chatBox.scrollHeight;
+      } catch (error) {
+        chatBox.innerHTML += `<p class="bot">Bot: [Error: ${error.message}]</p>`;
+      }
     }
   </script>
 </body>
